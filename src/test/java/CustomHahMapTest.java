@@ -1,64 +1,95 @@
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
 public class CustomHahMapTest {
 
-    @Test
-    public void putAndGetTest() {
-        CustomHashMap customHashMap = new CustomHashMap();
-        customHashMap.put(1, 3);
-        customHashMap.put(4, 31);
-        customHashMap.put(9, 77);
-        customHashMap.put(45, 46);
-        customHashMap.put(21, 2020);
+    private CustomHashMap hashMap;
 
-        assertEquals(31L, customHashMap.get(4));
-        assertEquals(3L, customHashMap.get(1));
-        assertEquals(77L, customHashMap.get(9));
-        assertEquals(46L, customHashMap.get(45));
-        assertEquals(2020L, customHashMap.get(21));
+    @Before
+    public void setUp() {
+        hashMap = new CustomHashMap(10);
+    }
+
+    @After
+    public void tearDown(){
+        hashMap = null;
     }
 
     @Test
-    public void putAndGetWhenValueOverriddenTest() {
-        CustomHashMap customHashMap = new CustomHashMap();
-
-        customHashMap.put(1, 5);
-        assertEquals(5L, customHashMap.get(1));
-
-        customHashMap.put(1, 7);
-        assertEquals(7L, customHashMap.get(1));
+    public void testNotCollision(){
+        assertEquals(hashMap.hashFunc(0), 0);
+        assertEquals(hashMap.hashFunc(1), 1);
+        assertEquals(hashMap.hashFunc(9), 9);
     }
 
     @Test
-    public void putAndGetWithCollisionTest() {
-        CustomHashMap customHashMap = new CustomHashMap();
-        customHashMap.put(12, 1);
-        customHashMap.put(-22, 2);
-        customHashMap.put(32, 3);
-        customHashMap.put(-52, 4);
-        customHashMap.put(72, 5);
-
-        assertEquals(5, customHashMap.getSize());
+    public void testIsCollision(){
+        assertEquals(hashMap.hashFunc(10), 0);
+        assertEquals(hashMap.hashFunc(11), 1);
+        assertEquals(hashMap.hashFunc(99), 9);
     }
 
     @Test
-    public void getSizeOfEmptyMapTest() {
-        CustomHashMap customHashMap = new CustomHashMap();
-        assertEquals(0, customHashMap.getSize());
-        ;
+    public void testPutNull(){
+        assertEquals(hashMap.put(null, 100l), 100l);
+        assertEquals(hashMap.put(null, 101l), 101l);
+        assertEquals(hashMap.put(null, 200l), 200l);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testPutIllegal() throws IllegalArgumentException {
+        assertEquals(hashMap.put(-1, 100l), 100l);
     }
 
     @Test
-    public void checkIfMapSizeIncreasedTest() {
-        CustomHashMap customHashMap = new CustomHashMap();
-        for (int i = 0; i < 100; i++)
-            customHashMap.put(i, i * i);
+    public void testPutAddValid(){
+        assertEquals(hashMap.put(1, 100l), 100l);
+        assertEquals(hashMap.put(11, 102l), 102l);
+        assertEquals(hashMap.put(2, 200l), 200l);
+        assertEquals(hashMap.put(3, 300l), 300l);
+        assertEquals(hashMap.put(77, 707l), 707l);
+    }
 
-        assertEquals(100, customHashMap.getSize());
+    @Test
+    public void testPutUpdate(){
+        assertEquals(hashMap.put(1, 100l), 100l);
+        assertEquals(hashMap.put(1, 101l), 101l);
+    }
 
-        for (int i = 0; i < 100; i++)
-            assertEquals(i * i, customHashMap.get(i));
+    @Test
+    public void testGetIsFound(){
+        hashMap.put(1, 100l);
+        hashMap.put(1, 101l);
+        hashMap.put(11, 102l);
+        hashMap.put(2, 200l);
+        hashMap.put(3, 300l);
+        hashMap.put(77, 707l);
+
+        assertEquals(hashMap.get(1), 101l);
+        assertEquals(hashMap.get(11), 102l);
+        assertEquals(hashMap.get(2), 200l);
+        assertEquals(hashMap.get(3), 300l);
+        assertEquals(hashMap.get(77), 707l);
+    }
+
+    @Test
+    public void testGetNotFound(){
+        assertEquals(hashMap.get(5), null);
+        assertEquals(hashMap.get(7), null);
+    }
+
+    @Test
+    public void testSize(){
+        hashMap.put(1, 100l);
+        hashMap.put(1, 101l);
+        hashMap.put(11, 102l);
+        hashMap.put(2, 200l);
+        hashMap.put(3, 300l);
+        hashMap.put(77, 707l);
+
+        assertEquals(hashMap.size(), 5);
     }
 }
