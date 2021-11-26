@@ -2,7 +2,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.NoSuchElementException;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 
 public class CustomHahMapTest {
 
@@ -10,7 +13,7 @@ public class CustomHahMapTest {
 
     @Before
     public void setUp() {
-        hashMap = new CustomHashMap(10);
+        hashMap = new CustomHashMap();
     }
 
     @After
@@ -20,43 +23,31 @@ public class CustomHahMapTest {
 
     @Test
     public void testNotCollision(){
-        assertEquals(hashMap.hashFunc(0), 0);
-        assertEquals(hashMap.hashFunc(1), 1);
-        assertEquals(hashMap.hashFunc(9), 9);
+        assertEquals(hashMap.hashIndex(0), 0);
+        assertEquals(hashMap.hashIndex(1), 1);
+        assertEquals(hashMap.hashIndex(9), 9);
+        assertEquals(hashMap.hashIndex(15), 15);
     }
 
     @Test
     public void testIsCollision(){
-        assertEquals(hashMap.hashFunc(10), 0);
-        assertEquals(hashMap.hashFunc(11), 1);
-        assertEquals(hashMap.hashFunc(99), 9);
+        assertEquals(hashMap.hashIndex(16), 0);
+        assertEquals(hashMap.hashIndex(17), 1);
+        assertEquals(hashMap.hashIndex(30), 14);
     }
 
     @Test
     public void testPutNull(){
-        assertEquals(hashMap.put(null, 100l), 100l);
-        assertEquals(hashMap.put(null, 101l), 101l);
-        assertEquals(hashMap.put(null, 200l), 200l);
-    }
+        hashMap.put(null, 1l);
+        assertEquals(1l, hashMap.get(null));
 
-    @Test(expected = IllegalArgumentException.class)
-    public void testPutIllegal() throws IllegalArgumentException {
-        assertEquals(hashMap.put(-1, 100l), 100l);
-    }
+        hashMap.put(null, 2l);
+        assertEquals(2l, hashMap.get(null));
 
-    @Test
-    public void testPutAddValid(){
-        assertEquals(hashMap.put(1, 100l), 100l);
-        assertEquals(hashMap.put(11, 102l), 102l);
-        assertEquals(hashMap.put(2, 200l), 200l);
-        assertEquals(hashMap.put(3, 300l), 300l);
-        assertEquals(hashMap.put(77, 707l), 707l);
-    }
+        hashMap.put(null, 3l);
+        assertEquals(3l, hashMap.get(null));
 
-    @Test
-    public void testPutUpdate(){
-        assertEquals(hashMap.put(1, 100l), 100l);
-        assertEquals(hashMap.put(1, 101l), 101l);
+        assertEquals(1, hashMap.getSize());
     }
 
     @Test
@@ -77,8 +68,8 @@ public class CustomHahMapTest {
 
     @Test
     public void testGetNotFound(){
-        assertEquals(hashMap.get(5), null);
-        assertEquals(hashMap.get(7), null);
+        assertThrows(NoSuchElementException.class, () -> hashMap.get(5));
+        assertThrows(NoSuchElementException.class, () -> hashMap.get(7));
     }
 
     @Test
@@ -90,6 +81,6 @@ public class CustomHahMapTest {
         hashMap.put(3, 300l);
         hashMap.put(77, 707l);
 
-        assertEquals(hashMap.size(), 5);
+        assertEquals(hashMap.getSize(), 5);
     }
 }

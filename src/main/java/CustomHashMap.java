@@ -1,81 +1,67 @@
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 
-import java.util.LinkedList;
-import java.util.List;
-
-public class CustomHashMap<K,V> extends SomeHash {
-
-    private int capacity = 16;
-    private List<Entry>[] entries;
-    private Entry entryNull;
+public class CustomHashMap extends SomeHash{
+    private static final double LOAD_FACTOR = 0.7;
+    private Entry[] entries = new Entry[16];
     private int size = 0;
 
-    public CustomHashMap() {
-        entries = new LinkedList[capacity];
+    private int findSlot(Object key) {
+        int i = hashIndex(key);
+
+        while ((entries[i] != null) && !Objects.equals(entries[i].getKey(), key))
+            i = (i + 1) % getCapacity();
+
+        return i;
     }
 
-    public CustomHashMap(int new_capacity) throws IllegalArgumentException {
-        if (new_capacity<1) throw new IllegalArgumentException("Illegal Argument");
+    public void put(Object key, Object value) {
+        if (tableIsTwoThirdsFull()) resizeTableToTwice();
+        int index = findSlot(key);
 
-        capacity = new_capacity;
-        entries = new LinkedList[new_capacity];
-    }
+        if (index == getCapacity() - 1 || key == null) index = 0;
 
-    public V put(K key, V val) throws IllegalArgumentException {
-        synchronized(entries){
-            int hash;
-
-            if (key != null) {
-                if (key.hashCode() < 0) throw new IllegalArgumentException("Illegal Argument");
-                else hash = hashFunc(key.hashCode());
-
-            } else {
-                entryNull = new Entry();
-                entryNull.setValue(val);
-                return val;
-            }
-            if (entries[hash] != null){
-                for (Entry e : entries[hash]){
-                    if (key.equals(e.getKey())){
-                        e.setValue(val);
-                        return val;
-                    }
-                }
-            } else entries[hash] = new LinkedList<>();
-
-            entries[hash].add(new Entry(key,val));
-            ++size;
+        if (entries[index] != null) {
+            entries[index].setValue(value);
+            return;
         }
-        return val;
+
+        entries[index] = new Entry(key, value);
+        ++size;
     }
 
-    public V get(final K key) {
-        synchronized(entries){
-            int hash = hashFunc(key.hashCode());
+    public Object get(Object key) {
+        int index = findSlot(key);
+        Entry temp = entries[index];
 
-            if (entries[hash] != null) {
-                for (Entry e: entries[hash])
-                    if (key.equals(e.getKey())) return e.getValue();
-            }
+        while(index < getCapacity() && temp != null) {
+            if (index == getCapacity() - 1) index = 0;
+            if (temp.getKey() == key) return temp.getValue();
         }
-        return null;
+        throw new NoSuchElementException("There isn't element with such key");
     }
 
-    public int getCapacity(){
-        return capacity;
+    private boolean tableIsTwoThirdsFull() {
+        return ((double) size / (double) getCapacity()) >= LOAD_FACTOR;
     }
 
-    public int size(){
+    private void resizeTableToTwice() {
+        size = 0;
+        Entry[] tempEntries = entries;
+        entries = new Entry[getCapacity() * 2];
+
+        for (int i = 0; i < tempEntries.length; i++) {
+            if (tempEntries[i] != null)
+                put(tempEntries[i].getKey(), tempEntries[i].getValue());
+        }
+    }
+
+    public int getSize() {
         return size;
     }
 
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    private class Entry {
-        private K key;
-        private V value;
+    @Override
+    protected int getCapacity() {
+        return entries.length;
     }
 }
