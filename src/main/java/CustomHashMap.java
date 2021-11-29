@@ -2,24 +2,22 @@ import java.util.NoSuchElementException;
 import java.util.Objects;
 
 public class CustomHashMap extends SomeHash{
-    private static final double LOAD_FACTOR = 0.7;
-    private Entry[] entries = new Entry[16];
+    private static final double LOAD_FACTOR = 1.0d;
+    private Entry[] entries = new Entry[4];
     private int size = 0;
 
-    private int findSlot(Object key) {
-        int i = hashIndex(key);
+    private int findSlot(int key) {
+        int i = hashFunc1(key);
 
         while ((entries[i] != null) && !Objects.equals(entries[i].getKey(), key))
-            i = (i + 1) % getCapacity();
+            i = (hashFunc1(key) + (i+1) * hashFunc2(key)) % getCapacity();
 
         return i;
     }
 
-    public void put(Object key, Object value) {
-        if (tableIsTwoThirdsFull()) resizeTableToTwice();
+    public void put(int key, long value) {
+        if (tableIsFull()) resizeTableToTwice();
         int index = findSlot(key);
-
-        if (index == getCapacity() - 1 || key == null) index = 0;
 
         if (entries[index] != null) {
             entries[index].setValue(value);
@@ -30,29 +28,25 @@ public class CustomHashMap extends SomeHash{
         ++size;
     }
 
-    public Object get(Object key) {
+    public Object get(int key) {
         int index = findSlot(key);
         Entry temp = entries[index];
 
-        while(index < getCapacity() && temp != null) {
-            if (index == getCapacity() - 1) index = 0;
-            if (temp.getKey() == key) return temp.getValue();
-        }
+        if (temp != null && Objects.equals(temp.getKey(), key)) return temp.getValue();
+
         throw new NoSuchElementException("There isn't element with such key");
     }
 
-    private boolean tableIsTwoThirdsFull() {
-        return ((double) size / (double) getCapacity()) >= LOAD_FACTOR;
+    private boolean tableIsFull() {
+        return ((double) size / (double) getCapacity()) == LOAD_FACTOR;
     }
 
     private void resizeTableToTwice() {
-        size = 0;
         Entry[] tempEntries = entries;
         entries = new Entry[getCapacity() * 2];
 
         for (int i = 0; i < tempEntries.length; i++) {
-            if (tempEntries[i] != null)
-                put(tempEntries[i].getKey(), tempEntries[i].getValue());
+            if (tempEntries[i] != null) entries[i] = tempEntries[i];
         }
     }
 

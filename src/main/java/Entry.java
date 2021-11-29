@@ -4,6 +4,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class Entry {
-    private Object key;
-    private Object value;
+    private int key;
+    private long value;
 }

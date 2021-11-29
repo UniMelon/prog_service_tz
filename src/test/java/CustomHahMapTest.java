@@ -23,31 +23,17 @@ public class CustomHahMapTest {
 
     @Test
     public void testNotCollision(){
-        assertEquals(hashMap.hashIndex(0), 0);
-        assertEquals(hashMap.hashIndex(1), 1);
-        assertEquals(hashMap.hashIndex(9), 9);
-        assertEquals(hashMap.hashIndex(15), 15);
+        assertEquals(hashMap.hashFunc1(0), 0);
+        assertEquals(hashMap.hashFunc1(1), 1);
+        assertEquals(hashMap.hashFunc1(9), 9);
+        assertEquals(hashMap.hashFunc1(15), 15);
     }
 
     @Test
     public void testIsCollision(){
-        assertEquals(hashMap.hashIndex(16), 0);
-        assertEquals(hashMap.hashIndex(17), 1);
-        assertEquals(hashMap.hashIndex(30), 14);
-    }
-
-    @Test
-    public void testPutNull(){
-        hashMap.put(null, 1l);
-        assertEquals(1l, hashMap.get(null));
-
-        hashMap.put(null, 2l);
-        assertEquals(2l, hashMap.get(null));
-
-        hashMap.put(null, 3l);
-        assertEquals(3l, hashMap.get(null));
-
-        assertEquals(1, hashMap.getSize());
+        assertEquals(hashMap.hashFunc1(16), 0);
+        assertEquals(hashMap.hashFunc1(17), 1);
+        assertEquals(hashMap.hashFunc1(30), 14);
     }
 
     @Test
